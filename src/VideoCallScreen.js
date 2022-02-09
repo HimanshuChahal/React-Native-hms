@@ -6,9 +6,11 @@ import uuid from 'react-native-uuid'
 
 export default ({ navigation, route }) => {
 
-    const [ joined, setJoined ] = useState(false)
+    const [ joined, setJoined ] = useState(true)
 
     const [ mic, setMic ] = useState(true)
+
+    const [ trackId, setTrackId ] = useState(undefined)
 
     const instance = route.params.instance
 
@@ -57,6 +59,16 @@ export default ({ navigation, route }) => {
             console.log('Room update listener callback')
 
         })
+
+        instance.addEventListener(HMSUpdateListenerActions.ON_TRACK_UPDATE, (value) => {
+            console.log('Track update listener callback')
+
+            instance.remotePeers = value.remotePeers
+
+            console.log(value.remotePeers[0].videoTrack)
+
+            setTrackId(value.remotePeers[0].videoTrack.trackId)
+        })
     
         const hmsConfig = new HMSConfig({ username: 'user', authToken: token })
     
@@ -74,7 +86,7 @@ export default ({ navigation, route }) => {
         joined ? (
                 <View style = {{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 
-                    <HMSView style = {{ width: '80%', height: 300 }} scaleType = { HMSVideoViewMode.ASPECT_FILL } trackId = { '8e964fdd-80ba-4047-9125-e8339bd13dd2' } mirror = { true } sink = { true }/>
+                    { trackId && <HMSView style = {{ width: '80%', height: 300 }} scaleType = { HMSVideoViewMode.ASPECT_FILL } trackId = { trackId } mirror = { true } sink = { true }/> }
 
                     <TouchableOpacity style = {{ padding: 10, backgroundColor: 'red', borderRadius: 30 }}
                     onPress = {() => {
