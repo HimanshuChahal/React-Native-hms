@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import BaseScreen from './src/BaseScreen';
 import VideoCallScreen from './src/VideoCallScreen';
+import 'expo-dev-client'
 
 const Stack = createNativeStackNavigator()
 

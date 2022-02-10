@@ -12,17 +12,13 @@ export default ({ navigation, route }) => {
 
     const [ trackId, setTrackId ] = useState(undefined)
 
+    const [ message, setMessage ] = useState('No message')
+
     const instance = route.params.instance
 
     const HMSView = instance.HmsView
 
-    const onPeerListener = ({
-        room,
-        type,
-        remotePeers,
-        localPeer,
-        peer,
-    }) => {
+    const onPeerListener = (value) => {
         
         console.log('On peer update listener callback')
     
@@ -54,7 +50,7 @@ export default ({ navigation, route }) => {
     
         instance.addEventListener(HMSUpdateListenerActions.ON_PEER_UPDATE, onPeerListener)
 
-        instance.addEventListener(HMSUpdateListenerActions.ON_ROOM_UPDATE, (room, type, localPeer, remotePeers) => {
+        instance.addEventListener(HMSUpdateListenerActions.ON_ROOM_UPDATE, (value) => {
 
             console.log('Room update listener callback')
 
@@ -69,8 +65,20 @@ export default ({ navigation, route }) => {
 
             setTrackId(value.remotePeers[0].videoTrack.trackId)
         })
+
+        instance.addEventListener(HMSUpdateListenerActions.ON_MESSAGE, (message) => {
+
+            console.log('Messages')
+
+            console.log(message)
+
+            setMessage('Message added')
+
+        })
     
         const hmsConfig = new HMSConfig({ username: 'user', authToken: token })
+
+        console.log('Called before join')
     
         instance.join(hmsConfig)
     
@@ -86,9 +94,9 @@ export default ({ navigation, route }) => {
         joined ? (
                 <View style = {{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 
-                    { trackId && <HMSView style = {{ width: '80%', height: 300 }} scaleType = { HMSVideoViewMode.ASPECT_FILL } trackId = { trackId } mirror = { true } sink = { true }/> }
+                    { trackId && <HMSView style = {{ width: '100%', height: '100%' }} scaleType = { HMSVideoViewMode.ASPECT_FILL } trackId = { trackId } mirror = { true } sink = { true }/> }
 
-                    <TouchableOpacity style = {{ padding: 10, backgroundColor: 'red', borderRadius: 30 }}
+                    <TouchableOpacity style = {{ position: 'absolute', alignSelf: 'center', width: 40, height: 40, bottom: 60, paddingVertical: 10, alignItems: 'center', backgroundColor: 'red', borderRadius: 30 }}
                     onPress = {() => {
 
                         if(!instance.localPeer)
@@ -102,23 +110,34 @@ export default ({ navigation, route }) => {
 
                         {
                             mic ? (
-                                <FontAwesome name = 'microphone-slash'/>
+                                <FontAwesome name = 'microphone-slash' size = { 20 } color = 'white'/>
                             ) : (
-                                <FontAwesome name = 'microphone'/>
+                                <FontAwesome name = 'microphone' size = { 20 } color = 'white'/>
                             )
                         }
 
                     </TouchableOpacity>
 
-                    <TouchableOpacity style = {{ padding: 10, backgroundColor: 'red', borderRadius: 30, marginTop: 20 }}
+                    <TouchableOpacity style = {{ position: 'absolute', bottom: 20, padding: 10, backgroundColor: 'red', borderRadius: 30, marginTop: 20 }}
                     onPress = {() => {
                         instance.leave()
                         navigation.pop()
                     }}>
 
-                        <Text>Leave</Text>
+                        <Text style = {{ color: 'white' }}>Leave</Text>
 
                     </TouchableOpacity>
+
+                    <TouchableOpacity style = {{ position: 'absolute', top: 20, paddingVertical: 10, paddingHorizontal: 30, borderRadius: 20, backgroundColor: 'black' }}
+                    onPress = {() => {
+                        instance.sendBroadcastMessage('Message sent')
+                    }}>
+
+                        <Text style = {{ color: 'white' }}>Message</Text>
+
+                    </TouchableOpacity>
+
+                    <Text style = {{ position: 'absolute', top: 50, color: 'red' }}>{ message }</Text>
 
                 </View>
             ) : (
